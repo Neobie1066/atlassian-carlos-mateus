@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carlos Mateus | Principal Solution Engineer & AI Strategist</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark: #050c1e;
+      --bg-gradient: radial-gradient(circle at 50% 20%, #0d2757 0%, #081533 45%, #030814 100%);
+      --accent-cyan: #00f2fe;
+      --accent-blue: #4facfe;
+      --accent-emerald: #00e676;
+      --accent-purple: #9d4edd;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --card-bg: rgba(13, 27, 62, 0.55);
+      --card-border: rgba(0, 242, 254, 0.15);
+      --card-hover-border: rgba(0, 242, 254, 0.45);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-dark);
+      background-image: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* Ambient Animated Canvas */
+    #particle-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .app-wrapper {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Top Navigation */
+    header {
+      background: rgba(5, 12, 30, 0.75);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #fff;
+    }
+    .logo-badge {
+      background: linear-gradient(135deg, #00f2fe, #4facfe);
+      color: #030814;
+      font-weight: 800;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      letter-spacing: 0.5px;
+    }
+    .logo-name {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+    .nav-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .btn {
+      padding: 0.55rem 1.2rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+    .btn-glass {
+      background: rgba(255, 255, 255, 0.06);
+      color: #e2e8f0;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .btn-glass:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.25);
+      color: #fff;
+    }
+    .btn-glow {
+      background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+      color: #030814;
+      font-weight: 700;
+      border: none;
+      box-shadow: 0 0 20px rgba(0, 242, 254, 0.35);
+    }
+    .btn-glow:hover {
+      box-shadow: 0 0 30px rgba(0, 242, 254, 0.6);
+      transform: translateY(-1px);
+    }
+
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem;
+    }
+
+    /* Hero */
+    .hero {
+      display: grid;
+      grid-template-columns: 1.2fr 0.95fr;
+      gap: 2.5rem;
+      align-items: center;
+      margin-bottom: 4.5rem;
+    }
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      background: rgba(0, 242, 254, 0.1);
+      border: 1px solid rgba(0, 242, 254, 0.25);
+      color: var(--accent-cyan);
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 1.2rem;
+    }
+    .hero h1 {
+      font-size: 3rem;
+      line-height: 1.15;
+      font-weight: 800;
+      letter-spacing: -1px;
+      margin-bottom: 1.2rem;
+      background: linear-gradient(135deg, #ffffff 40%, #a5b4fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+      line-height: 1.7;
+    }
+
+    /* Interactive Agent Terminal (Glassmorphism) */
+    .agent-window {
+      background: rgba(8, 19, 44, 0.7);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(0, 242, 254, 0.1);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .agent-header {
+      padding: 0.9rem 1.25rem;
+      background: rgba(4, 11, 28, 0.8);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .agent-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--accent-emerald);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--accent-emerald);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.2); }
+    }
+    .chat-body {
+      height: 290px;
+      overflow-y: auto;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .msg {
+      max-width: 85%;
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+    .msg-bot {
+      background: rgba(17, 34, 77, 0.6);
+      border: 1px solid rgba(0, 242, 254, 0.2);
+      color: #e2e8f0;
+      align-self: flex-start;
+    }
+    .msg-user {
+      background: linear-gradient(135deg, #0052cc, #4facfe);
+      color: #ffffff;
+      align-self: flex-end;
+      font-weight: 500;
+    }
+    .pills-tray {
+      padding: 0.75rem 1rem;
+      background: rgba(4, 11, 28, 0.5);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+    .pill {
+      font-size: 0.75rem;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--accent-cyan);
+      border: 1px solid rgba(0, 242, 254, 0.2);
+      padding: 4px 10px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .pill:hover {
+      background: rgba(0, 242, 254, 0.15);
+      border-color: var(--accent-cyan);
+    }
+    .input-tray {
+      display: flex;
+      padding: 0.75rem 1rem;
+      background: rgba(4, 11, 28, 0.9);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      gap: 8px;
+    }
+    .chat-input {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      padding: 0.5rem 0.8rem;
+      color: #fff;
+      font-size: 0.85rem;
+      outline: none;
+    }
+    .chat-input:focus {
+      border-color: var(--accent-cyan);
+    }
+
+    /* Cards & Layout */
+    .section-heading {
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .section-heading span {
+      background: linear-gradient(135deg, #00f2fe, #4facfe);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-bottom: 4.5rem;
+    }
+    .glass-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 1.8rem;
+      transition: all 0.3s ease;
+    }
+    .glass-card:hover {
+      border-color: var(--card-hover-border);
+      box-shadow: 0 10px 30px rgba(0, 242, 254, 0.15);
+      transform: translateY(-3px);
+    }
+    .card-icon {
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+    }
+    .glass-card h3 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 0.6rem;
+      color: #fff;
+    }
+    .glass-card p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    /* Education & Certs Matrix */
+    .creds-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 4.5rem;
+    }
+    .cred-badge-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 1rem;
+    }
+    .cred-tag {
+      background: rgba(0, 242, 254, 0.08);
+      border: 1px solid rgba(0, 242, 254, 0.2);
+      color: #e0f2fe;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 6px;
+    }
+    .cred-tag.gold {
+      background: rgba(255, 187, 0, 0.1);
+      border-color: rgba(255, 187, 0, 0.3);
+      color: #fde047;
+    }
+
+    /* Tabs Experience */
+    .tabs-wrapper {
+      background: var(--card-bg);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 2.2rem;
+      margin-bottom: 4.5rem;
+    }
+    .tab-nav {
+      display: flex;
+      gap: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 1rem;
+      margin-bottom: 2rem;
+    }
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      color: #030814;
+      background: linear-gradient(135deg, #00f2fe, #4facfe);
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    .tab-panel h4 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 0.3rem;
+      color: #fff;
+    }
+    .role-timeline {
+      font-size: 0.88rem;
+      color: var(--accent-cyan);
+      margin-bottom: 1.2rem;
+      font-weight: 500;
+    }
+    .tab-panel ul {
+      padding-left: 1.25rem;
+      color: #cbd5e1;
+    }
+    .tab-panel li {
+      margin-bottom: 0.75rem;
+      font-size: 0.95rem;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      background: rgba(3, 8, 20, 0.8);
+    }
+
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; }
+      .grid-3, .creds-container { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 2.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Dynamic Starfield / Neural Particles -->
+  <canvas id="particle-canvas"></canvas>
+
+  <div class="app-wrapper">
+
+    <!-- Top Navigation -->
+    <header>
+      <div class="nav-inner">
+        <a href="#" class="logo-container">
+          <span class="logo-badge">PRINCIPAL SOLUTION ENGINEER</span>
+          <span class="logo-name">Carlos Mateus</span>
+        </a>
+        <div class="nav-actions">
+          <a href="mailto:carlos.mateus@gmail.com" class="btn btn-glass">Email Carlos</a>
+          <a href="https://linkedin.com/in/cmateus" target="_blank" class="btn btn-glow">LinkedIn Profile</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      
+      <!-- Hero with Live Rovo-Style Chatbot -->
+      <section class="hero">
+        <div class="hero-left">
+          <div class="hero-eyebrow">
+            <span>✦</span> Principal Solution Engineer
+          </div>
+          <h1>Enterprise Architecture & Autonomous AI Workflows.</h1>
+          <p>
+            Bridging 20+ years of high-stakes enterprise presales across EMEA & North America with cutting-edge Agentic AI execution, agile case orchestration, and calm executive decision-making.
+          </p>
+          <div style="display: flex; gap: 14px; flex-wrap: wrap;">
+            <a href="#credentials" class="btn btn-glow">Explore Certifications & AI</a>
+            <a href="#experience" class="btn btn-glass">Platform Track Record</a>
+          </div>
+        </div>
+
+        <!-- Right: Carlos AI Terminal -->
+        <div class="agent-window">
+          <div class="agent-header">
+            <div class="agent-status">
+              <span class="pulse-dot"></span>
+              <span>Carlos Agent (Rovo Edition)</span>
+            </div>
+            <span style="font-size: 0.72rem; color: var(--accent-cyan); letter-spacing: 0.5px;">ONLINE</span>
+          </div>
+
+          <div class="chat-body" id="chatBody">
+            <div class="msg msg-bot">
+              Welcome Shreya & Atlassian leadership. I am Carlos's interactive agent. Ask me about his ESTP engineering foundation, Agentic AI credentials, Pega & Salesforce deal leadership, or his FIBA international refereeing experience.
+            </div>
+          </div>
+
+          <div class="pills-tray">
+            <button class="pill" onclick="askPreset('AI Credentials')">AI & Polytechnique Certs</button>
+            <button class="pill" onclick="askPreset('FIBA Referee')">FIBA Referee & Leadership</button>
+            <button class="pill" onclick="askPreset('Enterprise Deals')">Enterprise Deal Scale</button>
+            <button class="pill" onclick="askPreset('Why Atlassian')">Why Atlassian & Rovo?</button>
+          </div>
+
+          <div class="input-tray">
+            <input type="text" id="userInput" class="chat-input" placeholder="Ask a question..." onkeypress="handleKey(event)">
+            <button class="btn btn-glow" style="padding: 0.45rem 1rem;" onclick="sendCustomMessage()">Ask</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Elite Pillars -->
+      <section>
+        <div class="section-heading">
+          Strategic Value Pillars for <span>Atlassian Enterprise</span>
+        </div>
+        <div class="grid-3">
+          <div class="glass-card">
+            <div class="card-icon">⚡</div>
+            <h3>Autonomous & Agentic AI</h3>
+            <p>
+              Certified across <strong>Polytechnique Paris (AI for Business)</strong> and <strong>Salesforce (Agentforce Innovator & AI Associate)</strong>. Expert at framing AI beyond novelty into grounded enterprise agents that decompose workflows.
+            </p>
+          </div>
+          <div class="glass-card">
+            <div class="card-icon">🏛️</div>
+            <h3>Strategic Tier-1 Deal Leadership</h3>
+            <p>
+              15+ years partnering with Account Executives across complex RFP tenders, proof-of-concept design, and C-suite alignment at Salesforce and Pega in both France, EMEA, and the US.
+            </p>
+          </div>
+          <div class="glass-card">
+            <div class="card-icon">🏀</div>
+            <h3>Poise & Conflict Resolution</h3>
+            <p>
+              13 years as an <strong>International Basketball Referee with FIBA</strong> and national official with FFBB. Translates split-second arena impartiality and pressure control directly into complex client negotiations.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Credentials & Academic Excellence -->
+      <section id="credentials">
+        <div class="section-heading">
+          Education & <span>Certified Credentials</span>
+        </div>
+        <div class="creds-container">
+          
+          <!-- Academic & AI Specialization -->
+          <div class="glass-card">
+            <h3 style="color: var(--accent-cyan);">Academic Foundation & AI Specialization</h3>
+            <div style="margin-top: 1rem;">
+              <strong style="color: #fff; font-size: 1.05rem;">ESTP Paris</strong><br>
+              <span style="color: var(--text-muted); font-size: 0.88rem;">Master of Science in Civil & Structural Engineering (Diplôme d'Ingénieur) • 1999</span>
+            </div>
+            <div style="margin-top: 1.2rem;">
+              <strong style="color: #fff; font-size: 1.05rem;">École Polytechnique Paris</strong><br>
+              <span style="color: var(--text-muted); font-size: 0.88rem;">Executive Education — <em>AI for Business</em></span>
+            </div>
+            <div class="cred-badge-list">
+              <span class="cred-tag gold">Polytechnique AI for Business</span>
+              <span class="cred-tag">ESTP MSc Graduate</span>
+              <span class="cred-tag">TOEFL Certified (Fluent English)</span>
+            </div>
+          </div>
+
+          <!-- Professional Vendor Certifications -->
+          <div class="glass-card">
+            <h3 style="color: var(--accent-cyan);">Platform Architecture Certifications</h3>
+            <div style="margin-top: 1rem;">
+              <strong style="color: #fff; font-size: 0.95rem;">Salesforce Credentials:</strong>
+              <div class="cred-badge-list" style="margin-top: 0.5rem;">
+                <span class="cred-tag gold">Agentforce Specialist / Innovator</span>
+                <span class="cred-tag">Certified AI Associate</span>
+                <span class="cred-tag">Platform App Builder</span>
+                <span class="cred-tag">Certified Administrator</span>
+                <span class="cred-tag">Advanced Administrator</span>
+              </div>
+            </div>
+            <div style="margin-top: 1.4rem;">
+              <strong style="color: #fff; font-size: 0.95rem;">Pegasystems Credentials:</strong>
+              <div class="cred-badge-list" style="margin-top: 0.5rem;">
+                <span class="cred-tag gold">Senior System Architect (SSA)</span>
+                <span class="cred-tag">Certified Decisioning Consultant</span>
+                <span class="cred-tag">Certified Marketing Consultant</span>
+                <span class="cred-tag">Certified Pega System Administrator</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Platform Experience -->
+      <section id="experience">
+        <div class="section-heading">
+          Enterprise Experience <span>& Impact</span>
+        </div>
+        <div class="tabs-wrapper">
+          <div class="tab-nav">
+            <button class="tab-btn active" onclick="selectTab('salesforce', this)">Salesforce (2021–Present)</button>
+            <button class="tab-btn" onclick="selectTab('pega', this)">Pegasystems (2015–2021)</button>
+            <button class="tab-btn" onclick="selectTab('fiba', this)">FIBA & Leadership</button>
+            <button class="tab-btn" onclick="selectTab('prior', this)">Prior Enterprise (2001–2014)</button>
+          </div>
+
+          <div id="tab-salesforce" class="tab-panel active">
+            <h4>Principal Solution Engineer — Public Sector & Major Accounts</h4>
+            <div class="role-timeline">Salesforce | France (Remote) • April 2021 – Present</div>
+            <ul>
+              <li>Strategic solution co-pilot for Tier-1 French public sector pursuits, coordinating complex tender responses and multi-million-euro proposals.</li>
+              <li>Demonstrates live Agentforce, Einstein AI, and multi-cloud architectural engagements to C-suite and ministerial stakeholders.</li>
+              <li>Orchestrates live proofs of concept (POCs) and pilots adhering to stringent sovereign security, compliance, and GDPR standards.</li>
+              <li>Spearheads cross-cloud architectures spanning Service Cloud, Public Sector Solutions, and autonomous AI agents.</li>
+            </ul>
+          </div>
+
+          <div id="tab-pega" class="tab-panel">
+            <h4>Principal Demo Lead (Boston, USA) & Senior Solution Consultant (Paris)</h4>
+            <div class="role-timeline">Pegasystems (Pega) • Jan 2015 – Apr 2021</div>
+            <ul>
+              <li>Relocated to Boston headquarters as Global Demo Principal for Public Sector & Healthcare innovation.</li>
+              <li>Bridged field presales with Product Management and Engineering to feed real-world enterprise requirements into product roadmaps.</li>
+              <li>Engineered interactive showcase applications and live keynotes for PegaWorld and international executive briefings.</li>
+              <li>Certified Pega Senior System Architect (SSA) and Decisioning Consultant delivering end-to-end CRM and dynamic Case Management architectures.</li>
+            </ul>
+          </div>
+
+          <div id="tab-fiba" class="tab-panel">
+            <h4>International Referee (FIBA) & National Referee (FFBB)</h4>
+            <div class="role-timeline">FIBA & French Basketball Federation • 2003 – 2016</div>
+            <ul>
+              <li>Officiated high-intensity international and top-division national basketball matches in high-stakes environments.</li>
+              <li>Mastered split-second decision-making, active de-escalation of executive tension, and absolute neutrality under arena scrutiny.</li>
+              <li>Demonstrated leadership, physical conditioning, and rigorous adherence to international regulatory frameworks.</li>
+            </ul>
+          </div>
+
+          <div id="tab-prior" class="tab-panel">
+            <h4>Enterprise CRM, ITIL & Presales Leadership</h4>
+            <div class="role-timeline">Cegedim • Simplicité • Talentsoft • Systar • Devoteam | 2001 – 2014</div>
+            <ul>
+              <li><strong>Cegedim (2010–2014):</strong> Presales Lead for Life Sciences CRM and compliance data platforms (AggregateSpend360).</li>
+              <li><strong>Simplicité & Talentsoft:</strong> Low-code platform pipeline generation and partner alliance management with Capgemini, Sopra Steria, and Logica.</li>
+              <li><strong>Devoteam & Systar:</strong> ITIL service management, capacity planning, and network monitoring for premier financial institutions (BNP Paribas, Société Générale).</li>
+            </ul>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+
+    <footer>
+      <div>Carlos Mateus • Monségur & Bordeaux Area, France • Open to France-wide & International Enterprise Travel</div>
+      <div style="margin-top: 6px; opacity: 0.7;">Engineered for the Atlassian Solutions Engineering Selection Team</div>
+    </footer>
+
+  </div>
+
+  <!-- Background Particle Animation Script -->
+  <script>
+    const canvas = document.getElementById('particle-canvas');
+    const ctx = canvas.getContext('2d');
+    let width, height, particles;
+
+    function resize() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+      initParticles();
+    }
+
+    function initParticles() {
+      particles = [];
+      const count = Math.floor((width * height) / 18000);
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          vx: (Math.random() - 0.5) * 0.4,
+          vy: (Math.random() - 0.5) * 0.4,
+          radius: Math.random() * 1.5 + 0.5
+        });
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = 'rgba(0, 242, 254, 0.4)';
+      ctx.strokeStyle = 'rgba(0, 242, 254, 0.08)';
+
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+
+        if (p.x < 0) p.x = width;
+        if (p.x > width) p.x = 0;
+        if (p.y < 0) p.y = height;
+        if (p.y > height) p.y = 0;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        for (let j = i + 1; j < particles.length; j++) {
+          const p2 = particles[j];
+          const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+          if (dist < 120) {
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+          }
+        }
+      }
+      requestAnimationFrame(draw);
+    }
+
+    window.addEventListener('resize', resize);
+    resize();
+    draw();
+
+    // Tab Switching
+    function selectTab(id, btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + id).classList.add('active');
+    }
+
+    // Agent Q&A Knowledge Engine
+    const agentData = [
+      {
+        keys: ['ai', 'polytechnique', 'agentforce', 'credentials', 'certifications', 'certs'],
+        reply: "Carlos holds the Executive 'AI for Business' credential from École Polytechnique Paris, is a Salesforce Agentforce Specialist/Innovator and Certified AI Associate, and is a Pega Certified Senior System Architect (SSA), Decisioning Consultant, and Pega Admin."
+      },
+      {
+        keys: ['referee', 'basketball', 'fiba', 'pressure', 'ffbb'],
+        reply: "Carlos was an International Basketball Referee with FIBA (2003–2016) and a National Referee with the French Federation (FFBB). This gave him exceptional composure, rapid conflict de-escalation, and high-pressure decision-making skills that directly translate to executive C-level engagements."
+      },
+      {
+        keys: ['estp', 'degree', 'education', 'school'],
+        reply: "Carlos earned his Master of Science in Engineering (Diplôme d'Ingénieur) from ESTP Paris in 1999, providing him with a rigorous analytical and system-architecture foundation."
+      },
+      {
+        keys: ['deal', 'enterprise', 'fortune', 'salesforce', 'pega'],
+        reply: "Carlos has spent 15+ years leading presales architecture on complex Tier-1 public sector and Fortune 100 enterprise pursuits across Salesforce, Pega, and Cegedim in France, EMEA, and the US."
+      },
+      {
+        keys: ['why atlassian', 'atlassian', 'rovo', 'fit'],
+        reply: "Atlassian's mission of unleashing team potential through Jira, JSM, and Rovo mirrors Carlos's career in workflow orchestration, system architecture, and Agentic AI."
+      }
+    ];
+
+    function appendChat(text, type) {
+      const box = document.getElementById('chatBody');
+      const div = document.createElement('div');
+      div.className = `msg msg-${type}`;
+      div.innerText = text;
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function askAgent(text) {
+      appendChat(text, 'user');
+      const query = text.toLowerCase();
+      const match = agentData.find(item => item.keys.some(k => query.includes(k)));
+      const reply = match 
+        ? match.reply 
+        : "Carlos brings 20+ years of presales leadership spanning ESTP engineering, Salesforce Agentforce, Pega SSA, and FIBA international referee poise. Reach out to carlos.mateus@gmail.com for details!";
+      
+      setTimeout(() => appendChat(reply, 'bot'), 300);
+    }
+
+    function askPreset(txt) { askAgent(txt); }
+    function sendCustomMessage() {
+      const el = document.getElementById('userInput');
+      const val = el.value.trim();
+      if (!val) return;
+      askAgent(val);
+      el.value = '';
+    }
+    function handleKey(e) { if (e.key === 'Enter') sendCustomMessage(); }
+  </script>
+</body>
+</html>
